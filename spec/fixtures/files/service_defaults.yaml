@@ -1,0 +1,9 @@
+default_web_service: 
+  proxy_mode: internal
+  routing_tag: default
+  kubernetes_service_type: ClusterIP
+  ports:
+    https:
+      service_port: 443
+      container_port: 443
+      protocol: TCP

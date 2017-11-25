@@ -1,0 +1,4 @@
+example_id                   | status | run_time        |
+---------------------------- | ------ | --------------- |
+./spec/kubewulf_spec.rb[1:1] | passed | 0.00067 seconds |
+./spec/kubewulf_spec.rb[1:2] | failed | 0.01418 seconds |

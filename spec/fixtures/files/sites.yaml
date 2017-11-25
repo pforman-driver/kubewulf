@@ -1,0 +1,22 @@
+miguel:
+  default_config: dev_defaults
+range:
+  default_config: dev_defaults
+prod-a:
+  default_config: prod_defaults
+  cluster_id: prod-cluster-a
+  domain: prod-a.example.com
+  data:
+    foo-conf:
+      foo_db_hostname: "db-a"
+prod-b:
+  default_config: prod_defaults
+  cluster_id: prod-cluster-b
+  domain: prod-b.example.com
+  data:
+    service_node_ports:
+      public: 
+        https: 30112
+    foo-conf:
+      foo_db_hostname: "db-b"
+    

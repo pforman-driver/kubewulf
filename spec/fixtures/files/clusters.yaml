@@ -1,0 +1,16 @@
+cluster-1:
+  name: cluster-1
+  zone: us-west1-a
+  cloud_account_id: my-project-id
+cluster-2:
+  name: cluster-1
+  zone: us-west1-b
+  cloud_account_id: my-project-id
+prod-cluster-a:
+  name: prod-cluster-a
+  zone: us-west1-a
+  cloud_account_id: prod-project-id
+prod-cluster-b:
+  name: prod-cluster-b
+  zone: us-west1-b
+  cloud_account_id: prod-project-id

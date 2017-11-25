@@ -1,0 +1,38 @@
+dev_defaults:
+  cluster_id: cluster-1
+  secret_backend: test
+  service_name_suffix: "-sp"
+  domain: cluster-1.dev.example.com
+  environment: dev
+  data:
+    global-conf:
+      key_one: "key_one_data_a"
+      key_two: "key_two_data"
+      key_three: "key_three_data"
+    foo-conf:
+      foo_key_one: "just-for-foo"
+    global-secrets:
+      my_secret_key: "secret_key"
+      my_secret.file: |
+        thisisafile
+        thisisafile
+        thisisafile
+        thisisafile
+        thisisafile
+
+prod_defaults:
+  cluster_id: prod-cluster-a
+  secret_backend: hashicorp_vault
+  service_name_suffix: "-sp"
+  domain: prod.example.com
+  environment: prod
+  data:
+    global-conf:
+      key_one: "prod_key_one_data"
+      key_two: "prod_key_two_data"
+      key_three: "prod_key_three_data"
+    foo-conf:
+      foo_key_one: "prod_just-for-foo"
+    global-secrets:
+      my_secret_key: "secret/prod/key-one value"
+      my_secret.file: "secret/prod/key-file value"

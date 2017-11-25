@@ -1,0 +1,17 @@
+foo:
+  default_config: default_web_service
+bar:
+  default_config: default_web_service
+baz:
+  default_config: default_web_service
+fun-1:
+  default_config: default_web_service
+netacl:
+  default_config: default_web_service
+  proxy_mode: network_acl
+simple-auth:
+  default_config: default_web_service
+  proxy_mode: simple_auth
+public:
+  default_config: default_web_service
+  proxy_mode: public

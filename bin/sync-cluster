@@ -1,0 +1,65 @@
+#!/usr/bin/env ruby
+
+require "bundler/setup"
+require "kubewulf"
+
+log = Kubewulf::Logger
+ds = Kubewulf::Datastore.new(:base_file_path => "spec/fixtures/files")
+k = Kubewulf::Kubernetes.new()
+
+sites = ds.load_sites
+services = ds.load_services
+
+sites.each do |site_id, site|
+    log.debug "[#{site_id}] verifying namespace... "
+    site_rv = k.set_site(site)
+    log.debug "[#{site_id}] #{site_rv}"
+    if site_rv
+        log.debug "[#{site_id}] syncing config maps..."
+        site.config_maps.each do |cm|
+            log.debug "[#{site_id}] syncing cm - #{cm.name}: #{k.set_config_map(cm)}"
+        end
+
+        log.debug "[#{site_id}] syncing secrets..."
+        site.secrets.each do |secret|
+            log.debug "[#{site_id}] syncing secret - #{secret.name}: #{k.set_secret(secret)}"
+        end
+
+        log.debug "[#{site_id}] syncing services..."
+        services.each do |service_id, service| 
+            next unless site.run_service?(service_id)
+            log.debug "[#{site_id}] syncing service - #{service.name}: #{k.set_service(service, site)}"
+        end
+    end
+
+  puts
+end
+
+
+# puts "Nodes:"
+# k.nodes.each do |n|
+    # puts n.name
+    # n.conditions.each do |k, v|
+        # puts "#{k}: #{v[:status]}"
+    # end
+# end
+# puts
+# 
+# puts "Pods:"
+# k.pods.each do |p|
+    # puts "#{p.name} (p.version) - #{p.private_ipv4}"
+# end
+# puts
+# 
+# puts "Services:"
+# k.services.each do |s|
+    # p = s.ports.first
+    # puts "#{s.name} (#{s.version}) - #{p[:name]}://#{s.private_ipv4}:#{p[:port]}"
+# end
+
+# k.secrets.each do |s|
+#     next unless s.site == "prod-a"
+#     puts s.name
+#     puts s.to_yaml
+#     puts
+# end
