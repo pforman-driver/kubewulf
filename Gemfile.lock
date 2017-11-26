@@ -2,6 +2,10 @@ PATH
   remote: .
   specs:
     kubewulf (0.1.0)
+      deep_merge (~> 1.1.1)
+      kubeclient (~> 2.5.1)
+      rest-client (~> 2.0.2)
+      vault (~> 0.10)
 
 GEM
   remote: https://rubygems.org/

@@ -90,7 +90,7 @@ module Kubewulf
                 @log.debug "Loading service defaults: #{service_data[:default_config]}"
                 service.deep_merge!(service_data)
 
-                @log.debug service.inspect
+                # @log.debug service.inspect
 
                 s_obj = Kubewulf::Service.new
                 s_obj.name = service_id.to_s
@@ -99,7 +99,7 @@ module Kubewulf
                 s_obj.routing_tag = service[:routing_tag]
                 s_obj.ports = service[:ports]
                 
-                @log.debug s_obj.inspect
+                # @log.debug s_obj.inspect
 
                 services[service_id] = s_obj
             end

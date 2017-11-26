@@ -233,9 +233,9 @@ module Kubewulf
                        container_port: existing[:container_port],
                        protocol: existing[:protocol] }
             end
-            @log.debug a.inspect
-            @log.debug b.inspect
-            @log.debug "diff?" + (a != b).to_s
+            # @log.debug a.inspect
+            # @log.debug b.inspect
+            # @log.debug "diff?" + (a != b).to_s
             return a != b
         end
 
@@ -251,8 +251,8 @@ module Kubewulf
                      app_name: kube_service.app_name}
             if tmp_c != tmp_k
                 @log.debug "Diff in common params"
-                @log.debug tmp_c.inspect
-                @log.debug tmp_k.inspect
+                # @log.debug tmp_c.inspect
+                # @log.debug tmp_k.inspect
                 is_diff << true
             else
                 config_service.ports.each do |port_name, port_data|

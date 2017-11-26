@@ -30,7 +30,7 @@ module Kubewulf
             return value
         rescue Exception => e
             @log.warn "Unable to retrieve vault key '#{vault_key}' with field '#{field_name}': #{e}"
-            raise e
+            return nil
         end
 
         private
