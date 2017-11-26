@@ -15,9 +15,9 @@ module Kubewulf
 
     class Kubernetes
                      
-        def initialize
+        def initialize(options = {})
             @log = Kubewulf::Logger
-            @client_mode = "local"
+            @client_mode = options[:client_mode] || "local"
             @refresh_interval = 60
         end
 
