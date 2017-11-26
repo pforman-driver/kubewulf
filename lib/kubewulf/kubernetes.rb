@@ -318,13 +318,14 @@ module Kubewulf
             client = nil
             if @client_mode == "local"
                 client = Kubeclient::Client.new('http://localhost:8001/api/', 'v1')
-            else
-                auth_options = {
-                    bearer_token_file: '/var/run/secrets/kubernetes.io/serviceaccount/token'
-                }
-                client = Kubeclient::Client.new(
-                    'https://localhost:8443/api/', 'v1', auth_options: auth_options
-              )
+            elsif ENV['KUBERNETES_SERVICE_HOST']
+                ssl_options  = { ca_file: '/var/run/secrets/kubernetes.io/serviceaccount/ca.crt' }
+                auth_options = { bearer_token_file: '/var/run/secrets/kubernetes.io/serviceaccount/token' }
+                client = Kubeclient::Client.new( "https://#{ENV['KUBERNETES_SERVICE_HOST']}:#{ENV['KUBERNETES_PORT_443_TCP_PORT']}/api/", 
+                                                 'v1',
+                                                 auth_options: auth_options,
+                                                 ssl_options: ssl_options )
+
             end
             return client
         end
