@@ -39,6 +39,22 @@ Or install it yourself as:
     $ gem install kubewulf
 
 ## Usage
+### Domains
+As part of a site's config, you can set the domain, which will be used with the assumption that a service will be called by ```<service_name>.<site.domain>```
+This allows you manage DNS however you want. I use the site as a subdomain, so in a site named "range", by domain will be range.example.com, and a service named foo will be foo.range.example.com. 
+This pattern works in production as well, lets say you want three production sites, in each of us-east, us-west, and us-central. Name your site however you want, just as long as it is unique, e.g.: prod-ue, prod-uw, prod-uc. Lets say you have a front end web service named webfe, deployed to all three sites creating: 
+webfe.prod-uw.example.com
+webfe.prod-uc.example.com
+webfe.prod-ue.example.com
+
+You most likely don't want to expose webfe.prod-*.example.com to your customers, but using DNS or an external load balancer you can point www.example.com to the three webfe instances. 
+
+TODO: get more details on suggested load balancing and routing config. 
+
+### Cluster Proxy
+As part of the cluster agent, I have created a cluster-proxy service as well to help tie this all together. What I do is run haproxy in the cluster, exposing a single node_port, using the hostname to route requests to all the configured services. This allows you to have stronger controls over how traffic is routed to a service. There are things like turbine labs and istio that do a much better job of this, and for complex routing scenarios, you should look there. 
+This is intended for a single instance of a service in a site to be routeable via ```<service_name>.<site.domain>```
+
 ### Syncing a cluster
 I've included a cluster sync script, providing an example of how you can implement the functionality in your cluster, for local development and testing on the gem. See my working example for the cluster-agent at github.com/rangedev/cluster-agent. This is basically the cluster-agent script running in a docker container with the necessary config to get you up and running in your cluster pretty quickly.
 

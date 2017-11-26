@@ -1,0 +1,40 @@
+#!/usr/bin/env ruby
+
+require "bundler/setup"
+require "kubewulf"
+
+log = Kubewulf::Logger
+k = Kubewulf::Kubernetes.new()
+
+puts "Nodes:"
+k.existing_nodes.each do |n|
+    puts n.name
+    n.conditions.each do |k, v|
+        puts "#{k}: #{v[:status]}"
+    end
+end
+puts
+
+puts "Pods:"
+k.existing_pods.each do |p|
+    puts "#{p.name} (p.version) - #{p.private_ipv4}"
+end
+puts
+ 
+puts "Services:"
+k.existing_services.each do |s|
+    puts "#{s.name} (#{s.routing_tag}):"
+    puts "Internal address: #{s.private_ipv4}"
+    puts "App Name: #{s.app_name}"
+    puts "Site: #{s.site}"
+    puts "ports: #{s.ports.keys.inspect}"
+    puts
+end
+
+k.existing_secrets.each do |s|
+    next if s.site == "kube-system"
+    next if s.name.match /^default-token/
+    puts s.name
+    puts s.to_yaml
+    puts
+end

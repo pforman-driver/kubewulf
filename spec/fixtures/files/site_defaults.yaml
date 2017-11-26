@@ -6,7 +6,7 @@ dev_defaults:
   environment: dev
   data:
     global-conf:
-      key_one: "key_one_data_a"
+      key_one: "key_one_data"
       key_two: "key_two_data"
       key_three: "key_three_data"
     foo-conf:
