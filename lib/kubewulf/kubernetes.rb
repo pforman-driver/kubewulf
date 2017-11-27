@@ -19,6 +19,8 @@ module Kubewulf
             @log = Kubewulf::Logger
             @client_mode = options[:client_mode] || "local"
             @refresh_interval = 60
+            @log.debug "Kubernetes API client initialized: "
+            @log.debug "Client mode: #{@client_mode}"
         end
 
         def existing_config_maps

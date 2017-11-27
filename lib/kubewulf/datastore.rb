@@ -14,7 +14,15 @@ module Kubewulf
         require 'yaml'
         require 'deep_merge'
 
+        # Fog is a pretty heavy gem, we only use it 
+        # to keep cloud storage interactions abstracted
+        # perhaps in the future we may write our own abstraction
+        # to limit possible compatibility issues 
+        require 'fog'
+
         attr_accessor :base_file_path,
+                      :storage_provider,
+                      :cloud_storage_bucket,
                       :sites,
                       :file_format, # yaml or json 
                       :site_defaults,
@@ -25,10 +33,16 @@ module Kubewulf
             @log = Kubewulf::Logger
             @file_format = "yaml"
             @base_file_path = options[:base_file_path]
+            @storage_provider = options[:storage_provider] || "local"
+            @cloud_storage_bucket = options[:cloud_storage_bucket]
 
             if @base_file_path.nil?
                 raise "datastore::base_file_path not set!"
             end
+
+            @log.debug "Storage provider: #{@storage_provider}"
+            @log.debug "Storage bucket: #{@cloud_storage_bucket}"
+            @log.debug "Storage path: #{@base_file_path}"
         end
 
         # Build list of sites, constructed from the defined default hash, and the
@@ -49,7 +63,7 @@ module Kubewulf
                 # https://stackoverflow.com/questions/8206523/how-to-create-a-deep-copy-of-an-object-in-ruby
                 site = Marshal.load(Marshal.dump(site_defaults[site_data[:default_config].to_sym]))
 
-                @log.debug "Loading site defaults: #{site_data[:default_config]}"
+                @log.debug "Merging site '#{site_id} with following defaults: '#{site_data[:default_config]}'"
                 site.deep_merge!(site_data)
 
                 s_obj = Site.new
@@ -76,21 +90,19 @@ module Kubewulf
         def load_services
             services = {}
 
-            @log.debug "Loading services..."
+            @log.debug "Loading service_defaults..."
             service_defaults = load_objects("service_defaults")
             @log.debug "Found: #{service_defaults.keys.sort.join(", ")}"
 
             load_objects("services").each do |service_id, service_data|
     
-                @log.debug "Loading service_id: #{service_id}..."
+                @log.debug "Loading service '#{service_id}'..."
                 # Using marshalling to properly clone the service_default object
                 # https://stackoverflow.com/questions/8206523/how-to-create-a-deep-copy-of-an-object-in-ruby
                 service = Marshal.load(Marshal.dump(service_defaults[service_data[:default_config].to_sym]))
 
-                @log.debug "Loading service defaults: #{service_data[:default_config]}"
+                @log.debug "Merging service '#{service_id}' with following defaults: '#{service_data[:default_config]}'"
                 service.deep_merge!(service_data)
-
-                # @log.debug service.inspect
 
                 s_obj = Kubewulf::Service.new
                 s_obj.name = service_id.to_s
@@ -99,8 +111,6 @@ module Kubewulf
                 s_obj.routing_tag = service[:routing_tag]
                 s_obj.ports = service[:ports]
                 
-                # @log.debug s_obj.inspect
-
                 services[service_id] = s_obj
             end
             return services
@@ -108,42 +118,97 @@ module Kubewulf
 
         private
 
-        # Object load method, used to ensure interface to yaml files
+        # Object load method
         # is consistent
         def load_objects(obj_class)
             data = nil
-            f = nil
-
-            begin
-                f = File.open(File.join(@base_file_path, "#{obj_class}.#{@file_format}"), "r")
-            rescue Errno::ENOENT => e
-                @log.fatal "File not found: #{e}"
-                exit 1
-            rescue Exception => e
-                raise e
+            filename = "#{obj_class}.#{@file_format}"
+           
+            case storage_provider
+                when "local"
+                    data = load_local_file(filename)
+                else 
+                    data = load_cloud_file(filename)
             end
+ 
+            # Kubewulf::validate(obj_class)
+            # TODO: add object validations
 
-            begin
-                case @file_format
-                    when "json"
-                        data = JSON.load(f)
-                    when "yaml"
-                        data = YAML.load(f)
-                end
-            rescue Exception => e
-                raise e
-            end
-
-            begin
-                # Kubewulf::validate(obj_class)
-                # TODO: add object validations
-                true
-            rescue Exception => e
-                raise e
-            end
-
+            # Enforce symbolized keys
             data.symbolize_keys!
+
             return data
+        rescue Exception => e
+            raise e
+        end
+
+        # Common method to parse datastore file
+        def parse_file_data(raw_data)
+            data = nil
+            case @file_format
+                when "json"
+                    data = JSON.load(raw_data)
+                when "yaml"
+                    data = YAML.load(raw_data)
+            end
+            return data
+        rescue Exception => e
+            raise "Parse ERROR: #{e}"
+        end
+
+        # Basic file load, assumes base path is fully qualified
+        # TODO: leverage fog's cloud storage mocks to have 
+        # local be only for testing, as we assume that any one using 
+        # this gem for anything serious would use a managed cloud storage
+        # bucket
+        def load_local_file(filename)
+            data = nil
+            f = File.open(File.join(@base_file_path, filename), "r")
+            case @file_format
+                when "json"
+                    data = JSON.load(f)
+                when "yaml"
+                    data = YAML.load(f)
+            end
+            return data
+        rescue Errno::ENOENT => e
+            @log.fatal "File not found: #{e}"
+            exit 1
+        rescue Exception => e
+            raise e
+        end
+
+        # Common method to load file from cloud storage
+        def load_cloud_file(filename)
+            data = nil
+            resp = cloud_storage.get_object( @cloud_storage_bucket, 
+                                             File.join(@base_file_path, filename) ) 
+            if resp.body
+                data = parse_file_data(resp.body.to_s)
+            end
+        rescue Exception => e
+            raise "Cloud Storage ERROR: #{e}"
+        end
+
+        # Cloud storage client lazy loader
+        def cloud_storage
+            if @cloud_storage.nil?
+                case @storage_provider
+                    when "Google"
+                        @cloud_storage = Fog::Storage.new({
+                            :provider => 'Google',
+                            :google_storage_access_key_id => ENV['STORAGE_KEY_ID'],
+                            :google_storage_secret_access_key => ENV['STORAGE_SECRET'] })
+                    when "AWS"
+                        @cloud_storage = Fog::Storage.new({
+                            :provider => 'AWS',
+                            :aws_access_key_id => ENV['STORAGE_KEY_ID'],
+                            :aws_secret_access_key => ENV['STORAGE_SECRET'] })
+                end
+            end
+            return @cloud_storage
+        rescue Exception => e
+            raise "Cloud Storage Init ERROR: #{e}"
         end
         
     end # End Class

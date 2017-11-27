@@ -9,17 +9,18 @@ module Kubewulf
     require 'kubewulf/hashicorp_vault'
 end
 
+
 class Hash
-  def symbolize_keys!
-    t=self.dup
-    self.clear
-    t.each_pair do |k,v|
-      if v.kind_of?(Hash)
-        v.symbolize_keys!
-      end
-      self[k.to_sym] = v
-      self
+    def symbolize_keys!
+        t=self.dup
+        self.clear
+        t.each_pair do |k,v|
+            if v.kind_of?(Hash)
+                v.symbolize_keys!
+            end
+            self[k.to_sym] = v
+            self
+        end
+        self
     end
-    self
-  end
 end

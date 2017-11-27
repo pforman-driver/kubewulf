@@ -16,7 +16,7 @@ prod-b:
   data:
     service_node_ports:
       public: 
-        https: 30112
+        https: 30113
     foo-conf:
       foo_db_hostname: "db-b"
     

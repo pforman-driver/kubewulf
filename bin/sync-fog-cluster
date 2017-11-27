@@ -1,0 +1,51 @@
+#!/usr/bin/env ruby
+
+require "bundler/setup"
+require "kubewulf"
+require "fog"
+
+log = Kubewulf::Logger
+ds = Kubewulf::Datastore.new( :base_file_path => "rangedev/example.com", 
+                              :storage_provider => "Google",
+                              :cloud_storage_bucket => "kubewulf-site-configs")
+k = Kubewulf::Kubernetes.new()
+
+sites = ds.load_sites
+services = ds.load_services
+
+
+sites.each do |site_id, site|
+    log.debug "[#{site_id}] verifying namespace... "
+    site_rv = k.set_site(site)
+    log.debug "[#{site_id}] #{site_rv}"
+
+    if site_rv
+
+        # Lets say we want to create dynamic configs based on the site, we 
+        # can inject them into our existing config maps as the data field is 
+        # a simple hash with symbols for keys. 
+        # This is for when you want to use values found in the site, to compose
+        # a value in a config map
+        log.debug "[#{site_id}] syncing config maps..."
+        site.config_maps.each do |cm|
+            if cm.name == "global-conf" 
+                cm.data[:www_redirect_hostname] = "www.#{site.domain}" 
+            end
+                
+            log.debug "[#{site_id}] syncing cm - #{cm.name}: #{k.set_config_map(cm)}"
+        end
+
+        log.debug "[#{site_id}] syncing secrets..."
+        site.secrets.each do |secret|
+            log.debug "[#{site_id}] syncing secret - #{secret.name}: #{k.set_secret(secret)}"
+        end
+
+        log.debug "[#{site_id}] syncing services..."
+        services.each do |service_id, service| 
+            next unless site.run_service?(service_id)
+            log.debug "[#{site_id}] syncing service - #{service.name}: #{k.set_service(service, site)}"
+        end
+    end
+
+  puts
+end

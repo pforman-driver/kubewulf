@@ -36,9 +36,11 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rest-client", "~> 2.0.2"
   spec.add_development_dependency "kubeclient", "~> 2.5.1"
   spec.add_development_dependency "vault", "~> 0.10"
+  spec.add_development_dependency "fog", "~> 1.42"
 
   spec.add_runtime_dependency "deep_merge", "~> 1.1.1"
   spec.add_runtime_dependency "rest-client", "~> 2.0.2"
   spec.add_runtime_dependency "kubeclient", "~> 2.5.1"
   spec.add_runtime_dependency "vault", "~> 0.10"
+  spec.add_runtime_dependency "fog", "~> 1.42"
 end
