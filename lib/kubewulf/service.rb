@@ -17,9 +17,9 @@ module Kubewulf
         end
         
         # Overriding name to raise exceptions for bad format
-        # Must be /^[a-z][a-z0-9-]+[a-z0-9]$/
+        # Must be /^[a-z][a-z0-9-]*[a-z0-9]$/
         def name=(value)
-            if value.match /^[a-z][a-z0-9-]+[a-z0-9]$/
+            if value.match /^[a-z][a-z0-9-]*[a-z0-9]$/
                 @name = value
             else
                 raise "Invalid service name '#{value}', must be /^[a-z][a-z0-9-]+[a-z0-9]$/" 

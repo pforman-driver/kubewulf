@@ -5,9 +5,9 @@ require "kubewulf"
 require "fog"
 
 log = Kubewulf::Logger
-ds = Kubewulf::Datastore.new( :base_file_path => "rangedev/example.com", 
-                              :storage_provider => "Google",
-                              :cloud_storage_bucket => "kubewulf-site-configs")
+ds = Kubewulf::Datastore.new(:base_file_path => "rangedev/example.com", 
+                             :storage_provider => "Google",
+                             :cloud_storage_bucket => "kubewulf-site-configs")
 k = Kubewulf::Kubernetes.new()
 
 sites = ds.load_sites
