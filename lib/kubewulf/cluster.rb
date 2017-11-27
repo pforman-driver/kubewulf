@@ -7,6 +7,5 @@ module Kubewulf
 
         private
 
-        end # Private
     end # End Class
 end # End Module

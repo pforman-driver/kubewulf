@@ -9,9 +9,16 @@ k = Kubewulf::Kubernetes.new()
 
 sites = ds.load_sites
 services = ds.load_services
+clusters = ds.load_clusters
 
+agent_cluster = clusters[:'cluster-1'] 
 
 sites.each do |site_id, site|
+    if agent_cluster.name != site.cluster_id 
+        k.delete_site(site)
+        next
+    end
+
     log.debug "[#{site_id}] verifying namespace... "
     site_rv = k.set_site(site)
     log.debug "[#{site_id}] #{site_rv}"

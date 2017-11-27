@@ -65,6 +65,17 @@ module Kubewulf
             return @namespaces[:objects]
         end
 
+        def delete_site(site)
+            # TODO: kubeclient not deleting namespaces
+            rv = "no_change"
+            @log.info "Would be deleting site '#{site.name}'..."
+            if existing_namespaces.select{|n| n.name == site.name}.length == 0
+                # client.delete_namespace(site.name)
+                # rv = "deleted"
+            end
+            return rv
+        end
+
         def set_site(site)
             rv = "no_change"
             if existing_namespaces.select{|n| n.name == site.name}.length == 0

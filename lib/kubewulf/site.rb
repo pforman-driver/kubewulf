@@ -29,12 +29,6 @@ module Kubewulf
             return true
         end
 
-        # Returns list of services expected to be running 
-        # in the site, defaults to all service_types
-        def configured_services
-             
-        end
-
         # Returns list of config map objects found 
         # configured in @data
         def config_maps

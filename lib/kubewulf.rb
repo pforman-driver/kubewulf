@@ -1,6 +1,7 @@
 require "kubewulf/version"
 
 module Kubewulf
+    require 'kubewulf/cluster'
     require 'kubewulf/datastore'
     require 'kubewulf/site'
     require 'kubewulf/service'

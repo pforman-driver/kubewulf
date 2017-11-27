@@ -21,20 +21,20 @@ module Kubewulf
         require 'fog'
 
         attr_accessor :base_file_path,
-                      :storage_provider,
                       :cloud_storage_bucket,
-                      :sites,
+                      :cluster_data,
                       :file_format, # yaml or json 
-                      :site_defaults,
                       :service_type_data,
-                      :cluster_data
+                      :storage_provider,
+                      :site_defaults,
+                      :sites
 
         def initialize(options = {})
             @log = Kubewulf::Logger
-            @file_format = "yaml"
             @base_file_path = options[:base_file_path]
-            @storage_provider = options[:storage_provider] || "local"
             @cloud_storage_bucket = options[:cloud_storage_bucket]
+            @file_format = "yaml"
+            @storage_provider = options[:storage_provider] || "local"
 
             if @base_file_path.nil?
                 raise "datastore::base_file_path not set!"
@@ -114,6 +114,25 @@ module Kubewulf
                 services[service_id] = s_obj
             end
             return services
+        end
+
+        # Build the list of managed clusters
+        def load_clusters
+            clusters = {}
+
+            @log.debug "Loading clusters..."
+
+            load_objects("clusters").each do |cluster_id, cluster_data|
+
+                @log.debug "Loading cluster '#{cluster_id}'..."
+                c_obj = Kubewulf::Cluster.new
+                c_obj.name = cluster_id.to_s
+                c_obj.zone = cluster_data[:zone]
+                c_obj.cloud_account_id = cluster_data[:cloud_account_id]
+
+                clusters[cluster_id] = c_obj
+            end
+            return clusters
         end
 
         private
