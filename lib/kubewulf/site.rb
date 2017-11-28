@@ -8,7 +8,7 @@ module Kubewulf
                       :description,
                       :environment,
                       :secret_backend,
-                      :hosted_services,
+                      :explicit_service_list,
                       :domain,
                       :site_contact_email,
                       :site_contact_phone,
@@ -19,7 +19,7 @@ module Kubewulf
             @log = Kubewulf::Logger
             @config_maps = []
             @secrets = []
-            @hosted_services = []
+            @explicit_service_list = []
             load_options(options)
 
             @vault = HashicorpVault.new
@@ -50,10 +50,10 @@ module Kubewulf
         end
 
         def run_service?(service_name)
-            if @hosted_services.empty?
+            if @explicit_service_list.empty?
                 return true
             else
-                return @hosted_services.include?(service_name)
+                return @explicit_service_list.include?(service_name)
             end
         end
 
