@@ -71,6 +71,7 @@ module Kubewulf
                 s_obj.description = site[:description]
                 s_obj.domain = site[:domain]
                 s_obj.environment = site[:environment]
+                s_obj.hosted_services = site[:hosted_services]
                 s_obj.cluster_id = site[:cluster_id]
                 s_obj.secret_backend = site[:secret_backend]
                 s_obj.site_contact_email = site[:site_contact_email]
